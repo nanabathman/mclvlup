@@ -10,6 +10,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -48,12 +49,23 @@ public class blockBreakHandler {
     private LvlUp Woodcutting;
     private LvlUp Herbalism;
     private LvlUp Fishing;
+    private LvlUp Unarmed;
     private Random rand = new Random();
     private Long rightClickTime = 0L;
     private Long ActivationMiningTime = 0L;
     private ArrayList<LvlUp> lvlups = new ArrayList<>();
-    private boolean active = false;
-    private ArrayList<Block> speedblocksMining = new ArrayList<>();
+
+
+    public void updateLvlups() {
+        lvlups.clear();
+        lvlups.add(Mining);
+        lvlups.add(Excavation);
+        lvlups.add(Woodcutting);
+        lvlups.add(Herbalism);
+        lvlups.add(Fishing);
+        lvlups.add(Unarmed);
+    }
+
 
     @SubscribeEvent
     public void potionDurration(LivingEvent.LivingUpdateEvent event) {
@@ -75,22 +87,16 @@ public class blockBreakHandler {
         Woodcutting = new LvlUp("Woodcutting", "mclvlupWoodcutting", (EntityPlayer) event.player);
         Herbalism = new LvlUp("Herbalism", "mclvlupHerbalism", (EntityPlayer) event.player);
         Fishing = new LvlUp("Fishing", "mclvlupFishing", (EntityPlayer) event.player);
-        lvlups.clear();
-        lvlups.add(Mining);
-        lvlups.add(Excavation);
-        lvlups.add(Woodcutting);
-        lvlups.add(Herbalism);
-        lvlups.add(Fishing);
+        Unarmed = new LvlUp("Unarmed", "mclvlupUnarmed", (EntityPlayer) event.player);
+        updateLvlups();
     }
 
     @SubscribeEvent
     public void respawn(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent event) {
         if (player != null) {
-            event.player.getEntityData().setFloat("mclvlupMining", player.getEntityData().getFloat("mclvlupMining"));
-            event.player.getEntityData().setFloat("mclvlupExcavation", player.getEntityData().getFloat("mclvlupExcavation"));
-            event.player.getEntityData().setFloat("mclvlupWoodcutting", player.getEntityData().getFloat("mclvlupWoodcutting"));
-            event.player.getEntityData().setFloat("mclvlupHerbalism", player.getEntityData().getFloat("mclvlupHerbalism"));
-            event.player.getEntityData().setFloat("mclvlupFishing", player.getEntityData().getFloat("mclvlupFishing"));
+            for (LvlUp l : lvlups) {
+                event.player.getEntityData().setFloat(l.getKey(), player.getEntityData().getFloat(l.getKey()));
+            }
             for (String x : A) {
                 event.player.getEntityData().setBoolean(x, true);
             }
@@ -102,6 +108,16 @@ public class blockBreakHandler {
     public void deathEvent(LivingDeathEvent event) {
         if (event.getEntity() instanceof EntityPlayer) {
             player = (EntityPlayer) event.getEntity();
+        }else{
+            if(event.getSource().getTrueSource() instanceof EntityPlayer){
+               Unarmed.add(5);
+               if(event.getEntity() instanceof EntityIronGolem){
+                   Unarmed.add(20);
+               }
+               if(event.getEntity() instanceof net.minecraft.entity.monster.IMob){
+                  Unarmed.add(45);
+               }
+            }
         }
     }
 
@@ -127,7 +143,7 @@ public class blockBreakHandler {
 
     @SubscribeEvent
     public void activateE(PlayerInteractEvent.RightClickBlock event) throws InterruptedException {
-
+        updateLvlups();
         Item held = Minecraft.getMinecraft().player.getHeldItemMainhand().getItem();
         if (held == Items.WHEAT_SEEDS) {
             if (event.getWorld().getBlockState(event.getPos()).getBlock() == Blocks.COBBLESTONE) {
@@ -164,12 +180,7 @@ public class blockBreakHandler {
                 }
                 if (subHand == Items.AIR) {
 
-                    lvlups.clear();
-                    lvlups.add(Mining);
-                    lvlups.add(Excavation);
-                    lvlups.add(Woodcutting);
-                    lvlups.add(Herbalism);
-                    lvlups.add(Fishing);
+
                     Mining.sayLvl();
                     Mining.sayPoints();
 
@@ -180,12 +191,7 @@ public class blockBreakHandler {
 
         if (held == Items.DIAMOND_SHOVEL || held == Items.WOODEN_SHOVEL || held == Items.STONE_SHOVEL || held == Items.IRON_SHOVEL || held == Items.GOLDEN_SHOVEL) {
             if (event.getWorld().getTotalWorldTime() - rightClickTime > 100) {
-                lvlups.clear();
-                lvlups.add(Mining);
-                lvlups.add(Excavation);
-                lvlups.add(Woodcutting);
-                lvlups.add(Herbalism);
-                lvlups.add(Fishing);
+
                 Excavation.sayLvl();
                 Excavation.sayPoints();
                 rightClickTime = event.getWorld().getTotalWorldTime();
@@ -194,12 +200,7 @@ public class blockBreakHandler {
 
         if (held == Items.DIAMOND_AXE || held == Items.WOODEN_AXE || held == Items.STONE_AXE || held == Items.IRON_AXE || held == Items.GOLDEN_AXE) {
             if (event.getWorld().getTotalWorldTime() - rightClickTime > 100) {
-                lvlups.clear();
-                lvlups.add(Mining);
-                lvlups.add(Excavation);
-                lvlups.add(Woodcutting);
-                lvlups.add(Herbalism);
-                lvlups.add(Fishing);
+
                 Woodcutting.sayLvl();
                 Woodcutting.sayPoints();
                 rightClickTime = event.getWorld().getTotalWorldTime();

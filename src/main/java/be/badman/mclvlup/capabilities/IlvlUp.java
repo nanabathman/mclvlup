@@ -11,4 +11,5 @@ public interface IlvlUp {
     void sayLvl();
     void sayPoints();
     String getName();
+    String getKey();
 }

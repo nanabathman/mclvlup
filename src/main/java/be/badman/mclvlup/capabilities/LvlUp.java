@@ -56,4 +56,8 @@ public class LvlUp implements IlvlUp {
     public String getName(){
         return name;
     }
+    @Override
+    public String getKey(){
+        return key;
+    }
 }
