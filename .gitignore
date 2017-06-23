@@ -34,7 +34,7 @@ out
 *.iws
 *.iml
 .idea
-
+.txt
 # gradle
 build
 .gradle
