@@ -28,6 +28,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.ItemFishedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -80,7 +81,6 @@ public class blockBreakHandler {
 
     @SubscribeEvent
     public void onJoin(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
-
         event.player.sendMessage(new TextComponentString(ChatFormatting.RED + "Joined"));
         Mining = new LvlUp("Mining", "mclvlupMining", (EntityPlayer) event.player);
         Excavation = new LvlUp("Excavation", "mclvlupExcavation", (EntityPlayer) event.player);
@@ -108,15 +108,31 @@ public class blockBreakHandler {
     public void deathEvent(LivingDeathEvent event) {
         if (event.getEntity() instanceof EntityPlayer) {
             player = (EntityPlayer) event.getEntity();
-        }else{
-            if(event.getSource().getTrueSource() instanceof EntityPlayer){
-               Unarmed.add(5);
-               if(event.getEntity() instanceof EntityIronGolem){
-                   Unarmed.add(20);
-               }
-               if(event.getEntity() instanceof net.minecraft.entity.monster.IMob){
-                  Unarmed.add(45);
-               }
+        } else {
+            if (event.getSource().getTrueSource() instanceof EntityPlayer) {
+                Unarmed.add(5);
+                if (event.getEntity() instanceof EntityIronGolem) {
+                    Unarmed.add(20);
+                }
+                if (event.getEntity() instanceof net.minecraft.entity.monster.IMob) {
+                    Unarmed.add(45);
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void hurtMobEvent(LivingHurtEvent event) {
+        if (event.getEntity() instanceof EntityPlayer) {
+            if (Unarmed.getLvl() > rand.nextInt(500)) {
+                event.setCanceled(true);
+            }
+        } else {
+            if (event.getSource().getTrueSource() instanceof EntityPlayer) {
+                if (((EntityPlayer) event.getSource().getTrueSource()).getHeldItemMainhand().getItem() == Items.AIR) {
+                    event.setAmount(event.getAmount() * 1 + (Unarmed.getLvl() / 250));
+                }
+
             }
         }
     }
@@ -143,7 +159,7 @@ public class blockBreakHandler {
 
     @SubscribeEvent
     public void activateE(PlayerInteractEvent.RightClickBlock event) throws InterruptedException {
-        updateLvlups();
+
         Item held = Minecraft.getMinecraft().player.getHeldItemMainhand().getItem();
         if (held == Items.WHEAT_SEEDS) {
             if (event.getWorld().getBlockState(event.getPos()).getBlock() == Blocks.COBBLESTONE) {
@@ -165,6 +181,7 @@ public class blockBreakHandler {
 
         if (held == Items.DIAMOND_PICKAXE || held == Items.WOODEN_PICKAXE || held == Items.STONE_PICKAXE || held == Items.IRON_PICKAXE || held == Items.GOLDEN_PICKAXE) {
             if (event.getWorld().getTotalWorldTime() - rightClickTime > 100) {
+                updateLvlups();
                 if (subHand == Items.COAL) {
                     if (held == Items.DIAMOND_PICKAXE || held == Items.WOODEN_PICKAXE || held == Items.STONE_PICKAXE || held == Items.IRON_PICKAXE || held == Items.GOLDEN_PICKAXE && subHand == Items.COAL) {
                         if (event.getWorld().getTotalWorldTime() - ActivationMiningTime > 6000) {
@@ -180,7 +197,7 @@ public class blockBreakHandler {
                 }
                 if (subHand == Items.AIR) {
 
-
+                    updateLvlups();
                     Mining.sayLvl();
                     Mining.sayPoints();
 
@@ -191,7 +208,7 @@ public class blockBreakHandler {
 
         if (held == Items.DIAMOND_SHOVEL || held == Items.WOODEN_SHOVEL || held == Items.STONE_SHOVEL || held == Items.IRON_SHOVEL || held == Items.GOLDEN_SHOVEL) {
             if (event.getWorld().getTotalWorldTime() - rightClickTime > 100) {
-
+                updateLvlups();
                 Excavation.sayLvl();
                 Excavation.sayPoints();
                 rightClickTime = event.getWorld().getTotalWorldTime();
@@ -200,7 +217,7 @@ public class blockBreakHandler {
 
         if (held == Items.DIAMOND_AXE || held == Items.WOODEN_AXE || held == Items.STONE_AXE || held == Items.IRON_AXE || held == Items.GOLDEN_AXE) {
             if (event.getWorld().getTotalWorldTime() - rightClickTime > 100) {
-
+                updateLvlups();
                 Woodcutting.sayLvl();
                 Woodcutting.sayPoints();
                 rightClickTime = event.getWorld().getTotalWorldTime();
