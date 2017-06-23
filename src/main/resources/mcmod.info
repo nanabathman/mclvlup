@@ -1,0 +1,16 @@
+[
+{
+  "modid": "mclvlup",
+  "name": "MC lvl up",
+  "description": "Level up while playing Minecraft and get rewarded for doing that.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["nanaBathMan"],
+  "credits": "nanaBathMan",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
