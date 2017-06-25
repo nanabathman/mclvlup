@@ -1,6 +1,7 @@
 package be.badman.mclvlup;
 
 import be.badman.mclvlup.events.blockBreakHandler;
+import be.badman.mclvlup.events.mcLvlUpEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -20,7 +21,7 @@ public class McLvlUp {
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
 
-        MinecraftForge.EVENT_BUS.register(new blockBreakHandler());
+        MinecraftForge.EVENT_BUS.register(new mcLvlUpEvent());
 
     }
 }

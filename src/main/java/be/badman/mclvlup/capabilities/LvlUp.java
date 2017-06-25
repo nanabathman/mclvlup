@@ -25,7 +25,9 @@ public class LvlUp implements IlvlUp {
 
     @Override
     public void add(float points) {
-        player.getEntityData().setFloat(key, getPoints() + points);
+        if(getLvl() < 1000) {
+            player.getEntityData().setFloat(key, getPoints() + points);
+        }
     }
 
     @Override

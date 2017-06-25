@@ -6,31 +6,26 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.monster.EntitySpider;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.World;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.ItemFishedEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -79,9 +74,9 @@ public class blockBreakHandler {
         }
     }
 
+    //DONE
     @SubscribeEvent
     public void onJoin(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
-        event.player.sendMessage(new TextComponentString(ChatFormatting.RED + "Joined"));
         Mining = new LvlUp("Mining", "mclvlupMining", (EntityPlayer) event.player);
         Excavation = new LvlUp("Excavation", "mclvlupExcavation", (EntityPlayer) event.player);
         Woodcutting = new LvlUp("Woodcutting", "mclvlupWoodcutting", (EntityPlayer) event.player);
@@ -126,6 +121,7 @@ public class blockBreakHandler {
         if (event.getEntity() instanceof EntityPlayer) {
             if (Unarmed.getLvl() > rand.nextInt(500)) {
                 event.setCanceled(true);
+                event.getEntity().sendMessage(new TextComponentString(ChatFormatting.RED + "McLvlUp: Rolled damage."));
             }
         } else {
             if (event.getSource().getTrueSource() instanceof EntityPlayer) {
@@ -144,19 +140,25 @@ public class blockBreakHandler {
             event.getPlayer().getEntityData().setBoolean(event.getPos().toString(), true);
             A.add(event.getPos().toString());
         }
-
-
     }
 
     @SubscribeEvent
     public void catchFish(ItemFishedEvent event) {
         Fishing.add(15);
         if (Fishing.getLvl() > rand.nextInt(250)) {
-
             event.getEntityPlayer().getEntityWorld().spawnEntity(new EntityItem(event.getEntityPlayer().getEntityWorld(), event.getEntityPlayer().getPosition().getX(), event.getEntityPlayer().getPosition().getY(), event.getEntityPlayer().getPosition().getZ(), new ItemStack(event.getDrops().get(0).getItem())));
         }
+        if(event.getHookEntity().getRidingEntity() instanceof IMob){
+            System.out.println("datched");
+        }
     }
+@SubscribeEvent
+public void catchEvent(LivingEntityUseItemEvent event){
+        if(event.getItem().getItem() == Items.FISHING_ROD){
 
+            System.out.println(event.getEntity().getRidingEntity().getName());
+        }
+    }
     @SubscribeEvent
     public void activateE(PlayerInteractEvent.RightClickBlock event) throws InterruptedException {
 
@@ -196,11 +198,9 @@ public class blockBreakHandler {
                     }
                 }
                 if (subHand == Items.AIR) {
-
                     updateLvlups();
                     Mining.sayLvl();
                     Mining.sayPoints();
-
                 }
                 rightClickTime = event.getWorld().getTotalWorldTime();
             }
@@ -276,7 +276,7 @@ public class blockBreakHandler {
                 Excavation.add(8);
                 doubleDrop(event, Excavation);
                 if (Excavation.getLvl() > 10) {
-                    if (5 == rand.nextInt(20)) {
+                    if (5 == rand.nextInt(200)) {
                         Excavation.add(8);
                         event.getWorld().spawnEntity(new EntityItem(event.getWorld(), event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), new ItemStack(Items.GLOWSTONE_DUST)));
                     }
@@ -290,14 +290,14 @@ public class blockBreakHandler {
                 }
                 if (e == Blocks.GRAVEL) {
                     if (Excavation.getLvl() > 35) {
-                        if (5 == rand.nextInt(10)) {
+                        if (5 == rand.nextInt(100)) {
                             event.getWorld().spawnEntity(new EntityItem(event.getWorld(), event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), new ItemStack(Items.GUNPOWDER)));
                             Excavation.add(5);
 
                         }
                     }
                     if (Excavation.getLvl() > 75) {
-                        if (5 == rand.nextInt(10)) {
+                        if (5 == rand.nextInt(100)) {
                             event.getWorld().spawnEntity(new EntityItem(event.getWorld(), event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), new ItemStack(Items.BONE)));
                             Excavation.add(5);
 
@@ -306,14 +306,14 @@ public class blockBreakHandler {
                 }
                 if (e == Blocks.CLAY) {
                     if (Excavation.getLvl() > 100) {
-                        if (5 == rand.nextInt(10)) {
+                        if (5 == rand.nextInt(100)) {
                             event.getWorld().spawnEntity(new EntityItem(event.getWorld(), event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), new ItemStack(Items.BUCKET)));
                             Excavation.add(5);
 
                         }
                     }
                     if (Excavation.getLvl() > 35) {
-                        if (5 == rand.nextInt(10)) {
+                        if (5 == rand.nextInt(100)) {
                             event.getWorld().spawnEntity(new EntityItem(event.getWorld(), event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), new ItemStack(Items.SLIME_BALL)));
                             Excavation.add(5);
 
@@ -374,9 +374,8 @@ public class blockBreakHandler {
     }
 
     public void doubleDrop(BlockEvent.BreakEvent event, LvlUp lvl) {
-
         ItemStack x = new ItemStack(event.getState().getBlock().getItemDropped(event.getState(), new java.util.Random(1), 0));
-        if (lvl.getLvl() > rand.nextInt(500)) {
+        if (lvl.getLvl() > rand.nextInt(1000)) {
             event.getPlayer().sendMessage(new TextComponentString(ChatFormatting.YELLOW + "McLvlUp: Double Drop!"));
             event.getWorld().spawnEntity(new EntityItem(event.getWorld(), event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), x));
         }
